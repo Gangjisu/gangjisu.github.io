@@ -16,6 +16,18 @@
         padding: 0;
         box-sizing: border-box;
       }
+     #site-badge{
+       position:fixed;
+       top:10px;
+       left:10px;
+       font-family:"TheGoodMonolith", monospace;
+       font-size:14px;
+       color:#f0f0f0;
+       letter-spacing:1px;
+       opacity:0.8;
+       z-index:999;
+       pointer-events:none;
+     }
 
       body {
         font-family: "TheGoodMonolith", monospace;
@@ -282,10 +294,11 @@
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="site-badge">Gangjisu&nbsp;—&nbsp;Personal&nbsp;Website</div>
     <div id="root">
     </div>
     <footer>
-      <p>DRAG TO EXPLORE</p>
+      <p>DRAG&nbsp;/&nbsp;SCROLL&nbsp;/&nbsp;ARROW KEYS TO EXPLORE</p>
     </footer>
     <div id="titles-container"></div>
     <canvas id="canvas"></canvas>
