@@ -290,6 +290,71 @@
       display:inline-block;
       color:currentColor;
     }
+
+    /* Preloader styles (CodePen-inspired) */
+    #preloader {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      width: 100vw; height: 100vh;
+      background: radial-gradient(#222922, #000500);
+      z-index: 2000;
+      display: block;
+      transition: opacity 0.7s cubic-bezier(.77,0,.18,1);
+      opacity: 1;
+      pointer-events: all;
+      font-family: 'TheGoodMonolith', 'VT323', 'Source Code Pro', monospace;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+    #preloader.preloader-hide {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .word {
+      position: static;
+      margin: 0;
+      left: unset;
+      right: unset;
+      top: unset;
+      bottom: unset;
+      transform: none;
+      color: #fff;
+      font-size: 2.5em;
+      height: 2.5em;
+      line-height: 2.5em;
+      letter-spacing: 0.08em;
+      font-family: 'TheGoodMonolith', 'VT323', 'Source Code Pro', monospace;
+      user-select: none;
+      z-index: 2;
+      text-shadow: 0 0 10px rgba(50,255,50,0.5), 0 0 5px rgba(100,255,100,0.5);
+    }
+    .word span {
+      display: inline-block;
+      transform: translateX(100%) scale(0.9);
+      transition: transform 500ms, color 300ms, opacity 300ms;
+      opacity: 0.7;
+    }
+    .word .done {
+      color: #6f6;
+      transform: translateX(0) scale(1);
+      opacity: 1;
+    }
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(transparent 0%, rgba(10,16,10,0.5) 50%);
+      background-size: 1000px 2px;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      top: 0;
+      z-index: 1;
+      pointer-events: none;
+    }
+    /* Hide old dot/bar preloader */
+    .preloader-dots, .preloader-bar { display: none !important; }
     </style>
   </head>
   <body>
@@ -302,6 +367,13 @@
     </footer>
     <div id="titles-container"></div>
     <canvas id="canvas"></canvas>
+
+    <!-- Preloader overlay -->
+    <div id="preloader">
+      <div class="word">LOADING...</div>
+      <div class="overlay"></div>
+    </div>
+
   <script type="module">
 // 3D 슬라이더만을 위한 코드
 let mouseX = 0, mouseY = 0;
@@ -548,6 +620,72 @@ function main() {
   }, 300);
 }
 main();
+
+// Preloader ticker animation (vanilla JS)
+function tickerInit() {
+  const wordElem = document.querySelector('#preloader .word');
+  if (!wordElem) return;
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()-_=+{}|[]\\;\':\"<>?,./`~'.split('');
+  const origText = wordElem.textContent;
+  wordElem.innerHTML = '';
+  for (let c of origText) {
+    const span = document.createElement('span');
+    span.textContent = c;
+    span.setAttribute('data-orig', c);
+    wordElem.appendChild(span);
+  }
+  const letters = Array.from(wordElem.querySelectorAll('span'));
+  let done = false, cycleCount = 5, cycleCurrent = 0, letterCurrent = 0;
+  function getChar() {
+    return chars[Math.floor(Math.random() * chars.length)];
+  }
+  function reset() {
+    done = false;
+    cycleCurrent = 0;
+    letterCurrent = 0;
+    letters.forEach(span => {
+      span.textContent = span.getAttribute('data-orig');
+      span.classList.remove('done');
+    });
+    loop();
+  }
+  function loop() {
+    letters.forEach((span, idx) => {
+      if (idx >= letterCurrent && span.textContent !== ' ') {
+        span.textContent = getChar();
+        span.style.opacity = Math.random();
+      }
+    });
+    if (cycleCurrent < cycleCount) {
+      cycleCurrent++;
+    } else if (letterCurrent < letters.length) {
+      const curr = letters[letterCurrent];
+      cycleCurrent = 0;
+      curr.textContent = curr.getAttribute('data-orig');
+      curr.style.opacity = 1;
+      curr.classList.add('done');
+      letterCurrent++;
+    } else {
+      done = true;
+    }
+    if (!done) {
+      requestAnimationFrame(loop);
+    } else {
+      setTimeout(reset, 750);
+    }
+  }
+  reset();
+}
+window.addEventListener('DOMContentLoaded', () => {
+  tickerInit();
+  // Hide preloader after window load
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      const preloader = document.getElementById('preloader');
+      if (preloader) preloader.classList.add('preloader-hide');
+    }, 400); // delay for effect
+  });
+});
   </script>
   </body>
 </html>
