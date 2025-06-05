@@ -5,9 +5,536 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
     <title>Gang webapp</title>
+    <style>
+      /* 3D 슬라이드 hover 효과 */
+      @import url("https://fonts.cdnfonts.com/css/thegoodmonolith");
+      @import url("https://fonts.cdnfonts.com/css/pp-neue-montreal");
+      @import url("https://fonts.googleapis.com/css2?family=VT323&display=swap");
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "TheGoodMonolith", monospace;
+        background-color: #111;
+        color: #f0f0f0;
+        overflow: hidden;
+        position: relative;
+      }
+
+      body::after {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url("https://img.freepik.com/premium-photo/white-dust-scratches-black-background_279525-2.jpg?w=640");
+        background-repeat: repeat;
+        opacity: 0.1;
+        mix-blend-mode: screen;
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: transparent
+          url("http://assets.iceable.com/img/noise-transparent.png") repeat 0 0;
+        background-size: 300px 300px;
+        animation: noise-animation 0.3s steps(5) infinite;
+        opacity: 0.9;
+        will-change: transform;
+        z-index: 100;
+        pointer-events: none;
+      }
+
+      @keyframes noise-animation {
+        0% {
+          transform: translate(0, 0);
+        }
+        10% {
+          transform: translate(-2%, -3%);
+        }
+        20% {
+          transform: translate(-4%, 2%);
+        }
+        30% {
+          transform: translate(2%, -4%);
+        }
+        40% {
+          transform: translate(-2%, 5%);
+        }
+        50% {
+          transform: translate(-4%, 2%);
+        }
+        60% {
+          transform: translate(3%, 0);
+        }
+        70% {
+          transform: translate(0, 3%);
+        }
+        80% {
+          transform: translate(-3%, 0);
+        }
+        90% {
+          transform: translate(2%, 2%);
+        }
+        100% {
+          transform: translate(1%, 0);
+        }
+      }
+
+      p {
+        text-transform: uppercase;
+        font-size: 13px;
+        letter-spacing: 0.05em;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      footer {
+        position: fixed;
+        width: 100vw;
+        padding: 2em;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        z-index: 2;
+        mix-blend-mode: difference;
+        bottom: 0;
+        right: 0;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+      }
+
+      #canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        cursor: grab;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+      }
+
+      #canvas:active {
+        cursor: grabbing;
+      }
+
+
+      .tp-dfwv {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 10;
+      }
+
+      #titles-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+      }
+
+      .slide-title {
+        position: absolute;
+        color: white;
+        pointer-events: none;
+        font-family: "TheGoodMonolith", monospace;
+      }
+
+      .title-text {
+        font-family: "TheGoodMonolith", monospace;
+        text-transform: uppercase;
+        font-size: 6vw;
+        line-height: 0.9;
+        font-weight: 400;
+        letter-spacing: -0.03em;
+        margin: 0;
+        white-space: nowrap;
+      }
+
+      .title-number {
+        font-family: "TheGoodMonolith", monospace;
+        font-size: 0.8vw;
+        margin: 0;
+        position: relative;
+        padding-top: 10px;
+        display: flex;
+        align-items: center;
+      }
+
+      .title-number::before {
+        content: "";
+        display: block;
+        width: 40px;
+        height: 3px;
+        background-color: #ffe600;
+        margin-right: 10px;
+      }
+
+
+      @keyframes fadeIn {
+        0% {
+          opacity: 0;
+          transform: scale(0);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      @keyframes fadeOut {
+        0% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        100% {
+          opacity: 0;
+          transform: scale(0);
+        }
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(0.8);
+        }
+        50% {
+          transform: scale(1.2);
+        }
+        100% {
+          transform: scale(0.8);
+        }
+      }
+    /* Cyberpunk 2077‑style glitch button */
+    .btn-glitch-fill {
+      display:inline-block;
+      position:relative;
+      font-family:'VT323', monospace;
+      border:1px solid #fff;
+      color:#fff;
+      padding:10px 13px;
+      width:220px;                /* unified fixed width */
+      line-height:1.5em;
+      text-transform:uppercase;
+      cursor:pointer;
+      overflow:hidden;
+      z-index:0;
+    }
+    /* yellow fill overlay on hover */
+    .btn-glitch-fill::before{
+      content:'';
+      position:absolute;
+      inset:0;
+      background:#ff0;
+      transform:scaleX(0);
+      transform-origin:left;
+      transition:transform .35s ease;
+      z-index:-1;
+    }
+    .btn-glitch-fill:hover::before,
+    .btn-glitch-fill:focus::before{
+      transform:scaleX(1);
+    }
+    .btn-glitch-fill .text,
+    .btn-glitch-fill .decoration{display:inline-block;}
+    .btn-glitch-fill .decoration{float:right;}
+
+    /* hover / focus state */
+    .btn-glitch-fill:hover,
+    .btn-glitch-fill:focus{
+      color:#000;
+      border:1px solid #ff0;
+    }
+
+    /* active (pressed) state */
+    .btn-glitch-fill:active{
+      background:none;
+      color:#ff0;
+    }
+    .btn-glitch-fill:active .text-decoration,
+    .btn-glitch-fill:active .decoration{animation:none;}
+    .btn-glitch-fill:active::before,
+    .btn-glitch-fill:active::after{display:none;}
+
+    /* blinking cursor underscore */
+    .text-decoration{
+      display:inline-block;
+      color:currentColor;
+    }
+    </style>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
+    <div id="root">
+    </div>
+    <footer>
+      <p>DRAG TO EXPLORE</p>
+    </footer>
+    <div id="titles-container"></div>
+    <canvas id="canvas"></canvas>
+  <script type="module">
+// 3D 슬라이더만을 위한 코드
+let mouseX = 0, mouseY = 0;
+window.addEventListener('mousemove', e => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+});
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.153.0/build/three.module.js";
+
+// 슬라이드 데이터 및 파라미터
+const SLIDE_SIZE = { w: 2.5, h: 3.2 };
+const SLIDE_SPACING = 5.2;
+const SLIDE_DATA = [
+  { title: "ER\nResearch", number: "01", color: 0xFFE600, img: "/BSER/UnrankAsset.png", path: "/BSER/index.html" },
+  { title: "Source\nCode", number: "02", color: 0x00C9FF, img: "/BSER/UnrankAsset.png", path: "/Code/index.html" },
+  { title: "File\nShare",  number: "03", color: 0xFF3A6E, img: "/BSER/UnrankAsset.png", path: "/FileShare/index.html" },
+  { title: "Server",     number: "04", color: 0x7CFF56, img: "/BSER/UnrankAsset.png", path: "/Server/index.html" }
+];
+const canvas = document.getElementById('canvas');
+const titlesContainer = document.getElementById('titles-container');
+
+let renderer, scene, camera, slides = [], slideGroup;
+let currentSlide = 0, animating = false;
+// slide-change throttling
+let lastSlideChange = 0;
+const SLIDE_COOLDOWN = 300;   // ms : minimum gap between slide changes
+function canSlide() {
+  const now = performance.now();
+  if (now - lastSlideChange < SLIDE_COOLDOWN) return false;
+  lastSlideChange = now;
+  return true;
+}
+
+function init3D() {
+  renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight, false);
+  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.set(0, 0, 6);
+
+  slideGroup = new THREE.Group();
+  slides = SLIDE_DATA.map((slide, i) => {
+    const geo = new THREE.PlaneGeometry(SLIDE_SIZE.w, SLIDE_SIZE.h, 32, 32);
+    const tex = new THREE.TextureLoader().load(slide.img);
+    const mat = new THREE.MeshPhysicalMaterial({
+      map: tex,
+      transparent: true,
+      alphaTest: 0.05,
+      roughness: 0.2,
+      metalness: 0.1,
+      clearcoat: 0.3,
+      iridescence: 0.2,
+      transmission: 0.1
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.x = (i - 1) * SLIDE_SPACING;
+    mesh.userData = { idx: i };
+    slideGroup.add(mesh);
+    return mesh;
+  });
+  scene.add(slideGroup);
+  scene.add(new THREE.AmbientLight(0xffffff, 1.1));
+  const dLight = new THREE.DirectionalLight(0xffffff, 0.5);
+  dLight.position.set(5, 10, 6);
+  scene.add(dLight);
+}
+
+function updateTitles() {
+  titlesContainer.innerHTML = '';
+  SLIDE_DATA.forEach((slide, i) => {
+    const div = document.createElement('div');
+    div.className = 'slide-title';
+    div.innerHTML = `
+      <div class="title-text">${slide.title}</div>
+      <div class="title-number">${slide.number}</div>
+      <a class="btn-glitch-fill slide-link-btn" style="display:none;">
+        <span class="text">// Enter</span><span class="text-decoration">_</span><span class="decoration">&rArr;</span>
+      </a>
+    `;
+    titlesContainer.appendChild(div);
+  });
+}
+
+function gotoSlide(idx) {
+  if (animating) return;
+  // 무한 루프 처리
+  if (idx < 0) idx = slides.length - 1;
+  if (idx >= slides.length) idx = 0;
+  animating = true;
+  const start = slideGroup.position.x, end = -(idx - 1) * SLIDE_SPACING;
+  let t = 0;
+  function animate() {
+    t += 0.07;
+    slideGroup.position.x = start + (end - start) * Math.min(1, t);
+    if (t < 1) requestAnimationFrame(animate);
+    else {
+      slideGroup.position.x = end;
+      currentSlide = idx;
+      animating = false;
+    }
+  }
+  animate();
+}
+
+function bindEvents() {
+  // 드래그
+  let drag = false, lastX = 0;
+  canvas.addEventListener('mousedown', e => { drag = true; lastX = e.clientX; document.body.style.cursor = 'grabbing'; });
+  canvas.addEventListener('mousemove', e => {
+    if (!drag) return;
+    slideGroup.position.x += (e.clientX - lastX) / window.innerWidth * 8;
+    lastX = e.clientX;
+  });
+  window.addEventListener('mouseup', () => {
+    if (!drag) return;
+    drag = false; document.body.style.cursor = '';
+    let delta = slideGroup.position.x / SLIDE_SPACING;
+    // Throttle drag slide
+    if (!canSlide()) { slideGroup.position.x = 0; return; }
+    if (delta < 0) {
+      currentSlide = (currentSlide + 1) % slides.length;
+    } else if (delta > 0) {
+      currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+    }
+    slideGroup.position.x = 0;
+  });
+  // 휠
+  canvas.addEventListener('wheel', e => {
+    if (animating) return;
+    if (!canSlide()) return;
+    if (e.deltaY > 0) currentSlide = (currentSlide + 1) % slides.length;
+    else currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+    slideGroup.position.x = 0;
+  }, { passive: true });
+  // 키보드
+  window.addEventListener('keydown', e => {
+    if (animating) return;
+    if ((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && !canSlide()) return;
+    if (e.key === 'ArrowRight') currentSlide = (currentSlide + 1) % slides.length;
+    if (e.key === 'ArrowLeft') currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+    if (e.key === 'Enter') window.location.href = SLIDE_DATA[currentSlide].path;
+    slideGroup.position.x = 0;
+  });
+  // 터치
+  let touchStartX = 0;
+  canvas.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+  canvas.addEventListener('touchend', e => {
+    const endX = e.changedTouches[0].clientX;
+    if (Math.abs(endX - touchStartX) > 50) {
+      if (!canSlide()) { slideGroup.position.x = 0; return; }
+      if (endX < touchStartX) currentSlide = (currentSlide + 1) % slides.length;
+      else currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+      slideGroup.position.x = 0;
+    }
+  }, { passive: true });
+  // 클릭: 슬라이드 클릭 시 페이지 이동 기능 제거 (중앙 Enter 버튼에서만 이동)
+  // 리사이즈
+  window.addEventListener('resize', () => {
+    renderer.setSize(window.innerWidth, window.innerHeight, false);
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+  });
+}
+
+function animate3D() {
+  renderer.render(scene, camera);
+  const N = slides.length;
+  const slideEls = titlesContainer.querySelectorAll('.slide-title');
+
+  for (let j = 0; j < N; ++j) {
+    let pos;
+    if (j === currentSlide) pos = 0; // 중앙
+    else if ((j - currentSlide + N) % N === 1) pos = 1; // 오른쪽
+    else if ((j - currentSlide + N) % N === 2) pos = 2; // 오른쪽 끝
+    else if ((j - currentSlide + N) % N === 3) pos = -1; // 왼쪽
+    else pos = 99; // 숨김
+
+    // X좌표를 lerp로 부드럽게 이동
+    const targetX = pos * SLIDE_SPACING;
+    if (!slides[j].userData.currentX) slides[j].userData.currentX = slides[j].position.x;
+    slides[j].userData.targetX = targetX;
+    slides[j].userData.currentX += (targetX - slides[j].userData.currentX) * 0.15;
+    slides[j].position.x = slides[j].userData.currentX;
+    slides[j].visible = Math.abs(pos) <= 2;
+    // scale/blur 처리
+    const targetScale = (pos === 0) ? 1.12 : 1.0;
+    if (!slides[j].userData.scale) slides[j].userData.scale = 1.0;
+    slides[j].userData.scale += (targetScale - slides[j].userData.scale) * 0.18;
+    slides[j].scale.set(slides[j].userData.scale, slides[j].userData.scale, 1);
+    if (pos === 0) {
+      slides[j].material.roughness = 0.2;
+      slides[j].material.opacity = 1;
+    } else {
+      slides[j].material.roughness = 0.92;
+      slides[j].material.opacity = 0.44;
+    }
+
+    // 타이틀 위치/블러/표시 및 버튼 처리
+    const div = slideEls[j];
+    const btn = div.querySelector('.slide-link-btn');
+    if (Math.abs(pos) <= 2) {
+      div.style.display = 'block';
+      const vector = new THREE.Vector3();
+      vector.setFromMatrixPosition(slides[j].matrixWorld);
+      vector.project(camera);
+      const screenX = (vector.x * 0.5 + 0.5) * window.innerWidth;
+      const screenY = (vector.y * -0.5 + 0.5) * window.innerHeight;
+      div.style.left = `${screenX}px`;
+      div.style.top = `${screenY}px`;
+      div.style.opacity = '1';
+      div.style.pointerEvents = 'none';
+      div.style.filter = (pos === 0) ? 'none' : 'blur(6px)';
+      div.style.transform = 'translate(-50%, 0)';
+      div.style.pointerEvents = 'none';    // 타이틀 전체 클릭 비활성화
+      btn.style.pointerEvents = 'auto';    // 버튼만 클릭 가능
+      // 버튼 표시: 중앙(pos===0)만
+      if (pos === 0) {
+        btn.style.display = 'block';
+        btn.classList.add('show');              // trigger appear animation
+        btn.onclick = () => window.location.href = SLIDE_DATA[currentSlide].path;
+      } else {
+        btn.classList.remove('show');           // hide with animation
+        btn.style.display = 'none';
+        btn.onclick = null;
+      }
+    } else {
+      div.style.display = 'none';
+    }
+  }
+  requestAnimationFrame(animate3D);
+}
+
+function main() {
+  init3D();
+  updateTitles();
+  animate3D();
+  bindEvents();
+  // 본문 페이드인
+  setTimeout(() => {
+    canvas.style.opacity = 1;
+    titlesContainer.style.opacity = 1;
+    document.querySelector('footer').style.opacity = 1;
+  }, 300);
+}
+main();
+  </script>
   </body>
 </html>
