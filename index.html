@@ -1,23 +1,25 @@
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-compatible" content="chrome=1,IE=edge">
-    
-    <script type="text/javascript" src="/../js/jquery-3.5.1.min.js"></script>
-   
-    <script>
-        $(document).ready(function () {
-            $("#header").load("./en/index.html", function () {
-                document.getElementById("sub_nav").classList.add("show");
-            });
-        })
-    </script>
-    
 </head>
-
 <body>
-    <div id='header'></div>
-    
-    <article>
-        <div class="contents"></div>
-    </article>
+    <div data-include-path="./en/index.html"></div>
+    <script>
+        window.addEventListener('load', function() {
+            var allElements = document.getElementsByTagName('*');
+            Array.prototype.forEach.call(allElements, function(el) {
+                var includePath = el.dataset.includePath;
+                if (includePath) {
+                    var xhttp = new XMLHttpRequest();
+                    xhttp.onreadystatechange = function () {
+                        if (this.readyState == 4 && this.status == 200) {
+                            el.outerHTML = this.responseText;
+                        }
+                    };
+                    xhttp.open('GET', includePath, true);
+                    xhttp.send();
+                }
+            });
+        });
+ 
+    </script>
 </body>
