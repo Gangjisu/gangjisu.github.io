@@ -1,0 +1,24 @@
+
+/* Publications */
+
+.publications_lists ul {
+	padding-left: 20px;
+	margin-bottom: 80px;
+}
+
+.publications_lists ul li, .publications_lists p {
+	margin: 40px 0;
+}
+
+.publications_lists .handbook_translation_header {
+	margin-bottom: 0;
+}
+
+#content .publications_lists ul.handbook_translations {
+	margin-top: 0;
+	margin-bottom: 40px;
+}
+
+.publications_lists .handbook_translations li {
+	margin: 0;
+}

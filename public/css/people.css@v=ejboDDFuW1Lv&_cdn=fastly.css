@@ -1,0 +1,91 @@
+
+/* People */
+@media (min-width: 820px) {
+	.people .search_form_wrapper {
+		margin-bottom: -100px;
+		z-index: 99;
+		position: relative;
+	}
+}
+
+.people_list {
+	margin-top: 50px;
+	margin-bottom: 100px;
+}
+
+.people_list .people_category {
+	margin-top: 0;
+	margin-bottom: 40px;
+	padding-bottom: 0;
+}
+
+.people_list .people_category:first-of-type {
+	margin-top: 0;
+}
+
+.people_list .person {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+.people_list .name {
+	cursor: pointer;
+	transition: color linear 200ms;
+	margin-top: 5px;
+}
+
+@media (min-width: 820px) {
+	.people_list .name {
+		margin-bottom: 20px;
+	}
+}
+
+.people_list .name:hover,
+.people_list .person.active .name {
+	color: #f74843;
+}
+
+@media ( max-width: 819px ) {
+	.people_list .person_details_wrapper {
+		padding: 0;
+	}
+}
+
+.people_list .person_details {
+	height: 0;
+	overflow: hidden;
+	opacity: 0;
+	transition: all linear 200ms;
+	transform: translateZ(0);
+}
+
+.people_list .person.active .person_details {
+	height: auto;
+	opacity: 1;
+	overflow: visible;
+	transition: all linear 200ms;
+	transform: translateZ(0);
+	width: 100%;
+	margin-left: -5vw;
+	margin-bottom: 50px;
+	padding: 50px 5vw;
+	background: #ebebeb;
+}
+
+@media (min-width: 820px) {
+	.people_list .person.active .person_details {
+		height: 0;
+		background: transparent;
+		padding: 0;
+		margin: 0;
+		width: auto;
+	}
+}
+
+.people_list .person.active .person_details p.bio {
+	margin-top: 5px;
+}
+
+.people_list .contact_person + .view_steam_profile:before {
+	content: " - ";
+}

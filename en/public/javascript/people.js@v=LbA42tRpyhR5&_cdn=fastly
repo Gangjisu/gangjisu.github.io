@@ -1,0 +1,170 @@
+
+"use strict";
+
+var VsPeople = function ()
+{
+	function _PeopleSearch( m_Form, m_List )
+	{
+		$J( m_Form ).attr( 'action', '#' );
+		$J( m_Form ).addClass( 'filterform' );
+		var $m_Input = $J( m_Form ).find( 'input' );
+		$m_Input.addClass( 'filterinput' );
+		var $m_SearchButton = $J( m_Form ).find( '.search_button' );
+		var $m_ClearButton = $J( m_Form ).find( '.clear_button' );
+		var $m_NoResults = $J( '.people_list .no_results' );
+
+		$J( m_Form ).on(
+			'click touch',
+			'.clear_button',
+			function ( m_Event )
+			{
+				m_Event.stopPropagation();
+				$m_Input.val( '' ).change();
+			}
+		).on(
+			'submit',
+			function ( m_Event )
+			{
+				m_Event.preventDefault();
+			}
+		);
+
+		$m_Input.change(
+			function ( m_Event )
+			{
+				var m_strFilter = $J( this ).val();
+
+				// encode any html tags
+				m_strFilter = m_strFilter.replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
+
+				$m_NoResults.html( '' ).hide();
+
+				if ( m_strFilter )
+				{
+					$m_SearchButton.hide();
+					$m_ClearButton.show();
+
+
+					$J.each(
+						$J( '.people_list .person' ),
+						function ( key, m_elPerson )
+						{
+							var m_strFullName = $J( m_elPerson ).find( '.name' ).text();
+							var m_rgNames = m_strFullName.split( ' ' );
+							var m_bMatch = false;
+
+							if ( /\s/g.test( m_strFilter ) )
+							{
+								if ( m_strFullName.toLowerCase().indexOf( m_strFilter.toLowerCase() ) === 0 )
+								{
+									m_bMatch = true;
+								}
+							}
+							else
+							{
+								$J.each(
+									m_rgNames,
+									function ( key, m_strName )
+									{
+										if ( m_strName.toLowerCase().indexOf( m_strFilter.toLowerCase() ) === 0 )
+										{
+											m_bMatch = true;
+										}
+									}
+								);
+							}
+
+							if ( m_bMatch )
+							{
+								$J( m_elPerson ).show();
+							}
+							else
+							{
+								$J( m_elPerson ).hide();
+							}
+							$J( m_elPerson ).removeClass( 'active' );
+							$J( '.people-list' ).css( 'padding-bottom', 'inherit' );
+						}
+					);
+
+					$J.each(
+						$J( '.people_category' ),
+						function ( key, elPeopleCategory )
+						{
+							$J( elPeopleCategory ).show();
+
+							if ( $J( elPeopleCategory ).children( '.person' ).length == $J( elPeopleCategory ).children( '.person:hidden' ).length )
+							{
+								$J( elPeopleCategory ).hide();
+							}
+
+						}
+					);
+
+					if ( $J( '.people_list .person:visible' ).length < 1 )
+					{
+						$m_NoResults.html( "<h5>We didn't find anyone whose name begins with '" + m_strFilter + "'.</h5>" );
+						$m_NoResults.show();
+					}
+
+				}
+				else
+				{
+					$J( '.people_list .person' ).show();
+					$J( '.people_category' ).show();
+					$m_SearchButton.show();
+					$m_ClearButton.hide();
+				}
+
+				return false;
+			}
+		).keyup(
+			function ()
+			{
+				$J( this ).change();
+			}
+		);
+	}
+
+	function _People()
+	{
+		$J( '.people .person .name' ).on(
+			'click touch',
+			function ( m_Event )
+			{
+				m_Event.preventDefault();
+				var $m_person = $J( this ).parents( '.person' );
+				$J( '.people .person' ).removeClass( 'active' );
+				$m_person.addClass( 'active' );
+
+				$J( '.people .people_category ' ).css( 'padding-bottom', '0' );
+				var $m_PeopleCategory = $m_person.parents( '.people_category' );
+				var m_intPeopleCategoryBottom = $m_PeopleCategory.height() + $m_PeopleCategory.offset().top;
+				var $m_PersonBio = $m_person.find( '.bio' );
+				var m_intPersonBioBottom = $m_PersonBio.outerHeight() + $m_PersonBio.offset().top;
+				if ( m_intPersonBioBottom > m_intPeopleCategoryBottom )
+				{
+					$m_PeopleCategory.css( 'padding-bottom', m_intPersonBioBottom - m_intPeopleCategoryBottom + 50 );
+				}
+			}
+		);
+	}
+
+	function Init()
+	{
+		_PeopleSearch( '.people .search_form', ',people_list' );
+		_People();
+	}
+
+	return {
+		Init: Init
+	}
+}();
+
+
+$J( document ).ready(
+	function ()
+	{
+		VsPeople.Init();
+	}
+);

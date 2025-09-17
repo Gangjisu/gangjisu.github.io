@@ -1,0 +1,123 @@
+
+"use strict";
+
+var VsAbout = function ()
+{
+	function _LiveStatsWebAPI()
+	{
+		var m_rgStatIds = [
+			'#stats_users_online',
+			'#stats_users_ingame'
+		];
+
+		setInterval(
+			function()
+			{
+				if ( $J( '#stats_users_online' ).length > 0 && $J( '#stats_users_ingame' ).length > 0 )
+				{
+					$J.get(
+						"https://www.valvesoftware.com/en/about/stats",
+						function ( data )
+						{
+							if ( data.users_online )
+							{
+								$J( '#stats_users_online' ).text( data.users_online )
+							}
+							if ( data.users_ingame )
+							{
+								$J( '#stats_users_ingame' ).text( data.users_ingame )
+							}
+						}
+					);
+				}
+			},
+			30000
+		)
+	}
+
+	function _LiveStatsWS()
+	{
+		var m_strHeadlineStatsFeed = 'CommunityHeadlineStats';
+		var m_strWebSocketURL = "wss:\/\/community.steam-api.com\/websocket\/";
+
+		if ( !( "WebSocket" in window ) )
+		{
+			console.info( "No WebSocket support" );
+			_LiveStatsWebAPI();
+		}
+
+		var socket = new WebSocket( m_strWebSocketURL );
+
+		socket.onopen = function ()
+		{
+			var subscribe = { message: "subscribe", seqnum: 1, feed: m_strHeadlineStatsFeed };
+			socket.send( JSON.stringify( subscribe ) );
+		};
+
+		socket.onerror = function ()
+		{
+			try
+			{
+				socket.close();
+			}
+			catch ( exception )
+			{
+			}
+
+			_LiveStatsWebAPI();
+		};
+
+		socket.onclose = function ()
+		{
+			var cmsRetry = 90000 + Math.floor( Math.random() * 60000 );
+			console.log( "WebSocket closed. Retry in " + cmsRetry + "ms." );
+			setTimeout( _LiveStatsWS, cmsRetry );
+		};
+
+		socket.onmessage = function ( oMessage )
+		{
+			var data = $J.parseJSON( oMessage.data );
+
+			if ( data && data.message && data.message == "feedupdate" )
+			{
+				if ( data.feed == m_strHeadlineStatsFeed )
+				{
+					var feed = $J.parseJSON( data.data );
+					if ( !feed || !feed.users_online || !feed.users_ingame )
+					{
+						return;
+					}
+
+					$J( '#stats_users_online' ).text( feed.users_online.toLocaleString() )
+					$J( '#stats_users_ingame' ).text( feed.users_ingame.toLocaleString() )
+				}
+			}
+
+		};
+	}
+
+	function Init()
+	{
+		_LiveStatsWS();
+	}
+
+	return {
+		Init: Init
+	}
+}();
+
+
+$J( document ).ready(
+	function ()
+	{
+		VsAbout.Init();
+
+		$J('.carousel').flickity({
+			contain: true,
+			wrapAround: true,
+			prevNextButtons: false,
+			imagesLoaded: true
+		});
+		$J('.carousel').flickity('resize');
+	}
+);
